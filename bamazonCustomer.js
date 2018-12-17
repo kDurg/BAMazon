@@ -21,7 +21,7 @@ function mainSelectionPage() {
         inquirer //Not working on my computer???
             .prompt({
                 name: "selectionScreen",
-                type: "list",
+                type: "rawlist",
                 message: "Welcome to BAMazon, What Would You Like To Do Today?",
                 choices: [
                     "View All Products",
@@ -65,7 +65,7 @@ function viewProducts() {
         console.log("\n=============================================================================================\nCurrent Inventory\n____________________________________________________________________\n");
         inquirer.prompt({
             name: "buyProductYesNo",
-            type: "list",
+            type: "rawlist",
             message: "Would you like to buy an item?",
             choices: ["YES", "... Nah... "]
         }).then(function (answer) {
@@ -100,10 +100,18 @@ function purchaseProducts() {
             var bamazonStock = parseInt(res[i].stock_quantity)
             if (bamazonStock >= quantity) {
                 console.log(`\n\n\nYou bought ${quantity} x ${res[i].product_name}. Thank you! \n\nWhat would you like to do now?\n`);
-                //need to update database amount
+                function updateProductQuantity () {
+                    console.log(`...Updating BAMazon Quantities...`);
+                    var updatedQuantity = bamazonStock - quantity;  
+                    var query = connection.query ( "UPDATE products SET ? WHERE ?") [
+                        {quantity: updatedQuantity },
+                        {product : res[i].product_name}
+                    ]
+                }
+                
                 inquirer.prompt({
                     name: "buyMoreorGoHome",
-                    type: "list",
+                    type: "rawlist",
                     message: "Would you like to buy more products?",
                     choices: ["YES I NEED TO BUY MORE!!!!", "...Nah..."
                     ]
@@ -117,11 +125,12 @@ function purchaseProducts() {
                             break;
                     }
                 });
+
             } else {
                 console.log("Whoh, hold your horses, you seem like a horder. There isn't enough in inventory for your order!\n\n\n");
                 inquirer.prompt({
                     name: "tryAgainorGoHome",
-                    type: "list",
+                    type: "rawlist",
                     message: "Would you like to try to buy less or buy something else?",
                     choices: ["Let me try again", "I want to leave"
                     ]
@@ -138,4 +147,9 @@ function purchaseProducts() {
             }
         })
     });
+}
+
+function leaveBamazon () {
+    console.log("\n\n\nThank you for shopping at BAMazon, goodbye!\n\n\n\n");
+    connection.end();
 }
