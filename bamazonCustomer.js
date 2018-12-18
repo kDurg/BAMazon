@@ -18,10 +18,10 @@ connection.connect(function (err) {
 function mainSelectionPage() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        inquirer //Not working on my computer???
+        inquirer
             .prompt({
                 name: "selectionScreen",
-                type: "rawlist",
+                type: "list",
                 message: "Welcome to BAMazon, What Would You Like To Do Today?",
                 choices: [
                     "View All Products",
@@ -42,17 +42,6 @@ function mainSelectionPage() {
                         break;
                 }
             });
-        // var userInput = process.argv[2];
-        // console.log("\n\n\n\n\nWelcome to BAMazon, What Would You Like To Do Today?\n")
-        // console.log("Please type: Inventory, Buy or Exit");
-        // console.log("=============================================================================================\n\n");
-        // if (userInput === "inventory") {
-        //     viewProducts();
-        // } else if (userInput === "buy") {
-        //     purchaseProducts();
-        // } else if (userInput === "exit") {
-        //     leaveBamazon();
-        // } else {console.log("please select from the following commands: Inventory, Buy or Exit");}
     });
 }
 
@@ -66,7 +55,7 @@ function viewProducts() {
         console.log("\n=============================================================================================\nView Inventory \n____________________________________________________________________\n");
         inquirer.prompt({
             name: "buyProductYesNo",
-            type: "rawlist",
+            type: "list",
             message: "Would you like to buy an item?",
             choices: ["YES", "... Nah..."]
         }).then(function (answer) {
@@ -109,41 +98,21 @@ function purchaseProducts() {
                     console.log(`\n\n\nYou bought ${answer.howManyUnits} x ${res[0].product_name}. Thank you! \n\nWhat would you like to do now?\n`);
                     updateProductQuantity();
                     function updateProductQuantity() {
-                        console.log(`...Updating BAMazon Quantities...`);
-                        console.log(`.`);
-                        console.log(`...`);
-                        console.log(`....`);
-                        console.log(`.....`);
-                        console.log(`......`);
-                        console.log(`.......`);
-                        console.log(`......`);
-                        console.log(`.....`);
-                        console.log(`....`);
-                        console.log(`...`);
-                        console.log(`..`);
-                        console.log(`.`);
-                        console.log(`.`);
-                        console.log(`...`);
-                        console.log(`....`);
-                        console.log(`.....`);
-                        console.log(`......`);
-                        console.log(`.......`);
-                        console.log(`......`);
-                        console.log(`.....`);
-                        console.log(`....`);
-                        console.log(`...`);
-                        console.log(`..`);
-                        console.log(`.`);
+                        updatingScreen();
                         var updateProductQuantity = res[0].stock_quantity - answer.howManyUnits;
                         console.log(`local quantity: ${updateProductQuantity}`);
-                        connection.query("UPDATE products SET ? WHERE ?")[
-                            { stock_quantity: 400},
-                            { id: itemNumber}]
+                        //update is not updating database???
+                        connection.query("UPDATE products SET ? WHERE ?"[
+                            {stock_quantity: 400},
+                            {id: itemNumber}]), function(err) {
+                                if (err) throw err;
+                            };
+                        // quantities remain the same???
                         console.log(`updated quantity: ${res[0].stock_quantity} | for id: ${res[0].id} | for product: ${res[0].product_name}\n\n\n\n\n\n\n`);
-
+                        // kicks me out before the next prompt can return us to buy more or back to the homescreen
                         inquirer.prompt({
                             name: "buyMoreorGoHome",
-                            type: "rawlist",
+                            type: "list",
                             message: "Would you like to buy more products?\n\n\n",
                             choices: ["YES I NEED TO BUY MORE!!!!", "...Nah..."]
                         }).then(function (choice) {
@@ -155,14 +124,14 @@ function purchaseProducts() {
                                     mainSelectionPage()
                                     break;
                             }
-                        })
+                        });
                     }
 
                 } else {
                     console.log("Whoh, hold your horses, you seem like a horder. There isn't enough in inventory for your order!\n\n\n");
                     inquirer.prompt({
                         name: "tryAgainorGoHome",
-                        type: "rawlist",
+                        type: "list",
                         message: "Would you like to try to buy less or buy something else?",
                         choices: ["Let me try again", "I want to leave"
                         ]
@@ -187,12 +156,30 @@ function leaveBamazon() {
     connection.end();
 }
 
-function displayDatabaseItems() {
-    connection.query("SELECT * FROM products", function (err, res) {
-        if (err) throw err;
-        console.log("\n=============================================================================================\nCurrent Inventory\n____________________________________________________________________\n");
-        for (var i = 0; i < res.length; i++) {
-            console.log(`ID: ${res[i].id} | NAME: ${res[i].product_name} | DEPARTMENT: ${res[i].department_name} | PRICE: ${res[i].price} | REMAING: ${res[i].stock_quantity}`);
-        }
-    })
+function updatingScreen() {
+    console.log(`...Updating BAMazon Quantities...`);
+    console.log(`.`);
+    console.log(`...`);
+    console.log(`....`);
+    console.log(`.....`);
+    console.log(`......`);
+    console.log(`.......`);
+    console.log(`......`);
+    console.log(`.....`);
+    console.log(`....`);
+    console.log(`...`);
+    console.log(`..`);
+    console.log(`.`);
+    console.log(`.`);
+    console.log(`...`);
+    console.log(`....`);
+    console.log(`.....`);
+    console.log(`......`);
+    console.log(`.......`);
+    console.log(`......`);
+    console.log(`.....`);
+    console.log(`....`);
+    console.log(`...`);
+    console.log(`..`);
+    console.log(`.\n\n`);
 }
