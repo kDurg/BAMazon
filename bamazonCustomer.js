@@ -97,36 +97,6 @@ function purchaseProducts() {
                 if (res[0].stock_quantity >= answer.howManyUnits) { //need to pull object by id, compare number?
                     console.log(`\n\n\nYou bought ${answer.howManyUnits} x ${res[0].product_name}. Thank you! \n\nWhat would you like to do now?\n`);
                     updateProductQuantity();
-                    function updateProductQuantity() {
-                        updatingScreen();
-                        var updateProductQuantity = res[0].stock_quantity - answer.howManyUnits;
-                        console.log(`local quantity: ${updateProductQuantity}`);
-                        //update is not updating database???
-                        connection.query("UPDATE products SET ? WHERE ?"[
-                            {stock_quantity: 400},
-                            {id: itemNumber}]), function(err) {
-                                if (err) throw err;
-                            };
-                        // quantities remain the same???
-                        console.log(`updated quantity: ${res[0].stock_quantity} | for id: ${res[0].id} | for product: ${res[0].product_name}\n\n\n\n\n\n\n`);
-                        // kicks me out before the next prompt can return us to buy more or back to the homescreen
-                        inquirer.prompt({
-                            name: "buyMoreorGoHome",
-                            type: "list",
-                            message: "Would you like to buy more products?\n\n\n",
-                            choices: ["YES I NEED TO BUY MORE!!!!", "...Nah..."]
-                        }).then(function (choice) {
-                            switch (choice.buyMoreorGoHome) {
-                                case "YES I NEED TO BUY MORE!!!!":
-                                    purchaseProducts()
-                                    break;
-                                case "...Nah...":
-                                    mainSelectionPage()
-                                    break;
-                            }
-                        });
-                    }
-
                 } else {
                     console.log("Whoh, hold your horses, you seem like a horder. There isn't enough in inventory for your order!\n\n\n");
                     inquirer.prompt({
@@ -182,4 +152,46 @@ function updatingScreen() {
     console.log(`...`);
     console.log(`..`);
     console.log(`.\n\n`);
+}
+
+function updateProductQuantity() {
+    updatingScreen();
+    morePurchase();
+
+    connection.query("SELECT * FROM products", function (err, res) {
+        if (err) throw err;
+
+        for (var i = 0; i < res.length; i++) {
+            var updateProductQuantity = res[0].stock_quantity - answer.howManyUnits;
+            console.log(`local quantity: ${updateProductQuantity}`);
+        //update is not updating database???
+            connection.query("UPDATE products SET ? WHERE ?"[{stock_quantity: 400}, {id: itemNumber}]), 
+                function(err,res) {
+                    if (err) throw err;
+                    console.log(`updated quantity: ${res[0].stock_quantity} | for id: ${res[0].id} | for product: ${res[0].product_name}\n\n\n\n\n\n\n`);   
+                };
+            }
+        }, 
+    )
+}   
+    // quantities remain the same???
+    // kicks me out before the next prompt can return us to buy more or back to the homescreen
+
+
+function morePurchase(){
+    inquirer.prompt({
+        name: "buyMoreorGoHome",
+        type: "list",
+        message: "Would you like to buy more products?\n\n\n",
+        choices: ["YES I NEED TO BUY MORE!!!!", "...Nah..."]
+    }).then(function (choice) {
+        switch (choice.buyMoreorGoHome) {
+            case "YES I NEED TO BUY MORE!!!!":
+                purchaseProducts()
+                break;
+            case "...Nah...":
+                mainSelectionPage()
+                break;
+        }
+    });
 }
