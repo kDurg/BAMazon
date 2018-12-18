@@ -29,7 +29,8 @@ function mainSelectionPage() {
                     "Leave BAMazon"
                 ]
             }).then(function (answer) {
-                switch (answer.action) {
+                console.log(answer);
+                switch (answer.selectionScreen) {
                     case "View All Products":
                         viewProducts();
                         break;
@@ -62,19 +63,20 @@ function viewProducts() {
         for (var i = 0; i < res.length; i++) {
             console.log(`ID: ${res[i].id} | NAME: ${res[i].product_name} | DEPARTMENT: ${res[i].department_name} | PRICE: ${res[i].price} | REMAING: ${res[i].stock_quantity}`);
         }
-        console.log("\n=============================================================================================\nCurrent Inventory\n____________________________________________________________________\n");
+        console.log("\n=============================================================================================\nView Inventory \n____________________________________________________________________\n");
         inquirer.prompt({
             name: "buyProductYesNo",
             type: "rawlist",
             message: "Would you like to buy an item?",
-            choices: ["YES", "... Nah... "]
+            choices: ["YES", "... Nah..."]
         }).then(function (answer) {
-            switch (answer.action) {
+            console.log(answer);
+            switch (answer.buyProductYesNo) {
                 case "YES":
-                    purchaseProducts()
+                    purchaseProducts();
                     break;
                 case "... Nah...":
-                    mainSelectionPage()
+                    mainSelectionPage();
                     break;
             }
         })
@@ -89,67 +91,108 @@ function purchaseProducts() {
         for (var i = 0; i < res.length; i++) {
             console.log(`ID: ${res[i].id} | NAME: ${res[i].product_name} | DEPARTMENT: ${res[i].department_name} | PRICE: ${res[i].price} | REMAING: ${res[i].stock_quantity}`);
         }
-        console.log("\n=======================================================\nCurrent Inventory\n____________________________________________________________________\n");
+        console.log("\n=============================================================================================\nPURCHASE SCREEN\n____________________________________________________________________\n");
         console.log("\nWhat would you like to buy?\n\n")
-        inquirer.prompt({
+        inquirer.prompt([{
             name: "purchaseWhichItem",
             type: "input",
             message: "Select a product by its ID number",
-        }).then(function (answer) {
-            var quantity = parseInt(answer.input);
-            var bamazonStock = parseInt(res[i].stock_quantity)
-            if (bamazonStock >= quantity) {
-                console.log(`\n\n\nYou bought ${quantity} x ${res[i].product_name}. Thank you! \n\nWhat would you like to do now?\n`);
-                function updateProductQuantity () {
-                    console.log(`...Updating BAMazon Quantities...`);
-                    var updatedQuantity = bamazonStock - quantity;  
-                    var query = connection.query ( "UPDATE products SET ? WHERE ?") [
-                        {quantity: updatedQuantity },
-                        {product : res[i].product_name}
-                    ]
-                }
-                
-                inquirer.prompt({
-                    name: "buyMoreorGoHome",
-                    type: "rawlist",
-                    message: "Would you like to buy more products?",
-                    choices: ["YES I NEED TO BUY MORE!!!!", "...Nah..."
-                    ]
-                }).then(function (choice) {
-                    switch (choice.action) {
-                        case "YES I NEED TO BUY MORE!!!!":
-                            purchaseProducts()
-                            break;
-                        case "...Nah...":
-                            mainSelectionPage()
-                            break;
-                    }
-                });
+        }, {
+            name: "howManyUnits",
+            type: "input",
+            message: "How many would you like to purchase?"
+        }]).then(function (answer) {
+            var itemNumber = parseInt(answer.purchaseWhichItem);
+            connection.query("SELECT * FROM products WHERE id = ?", [itemNumber], function (err, res) {
+                if (err) throw err;
+                if (res[0].stock_quantity >= answer.howManyUnits) { //need to pull object by id, compare number?
+                    console.log(`\n\n\nYou bought ${answer.howManyUnits} x ${res[0].product_name}. Thank you! \n\nWhat would you like to do now?\n`);
+                    updateProductQuantity();
+                    function updateProductQuantity() {
+                        console.log(`...Updating BAMazon Quantities...`);
+                        console.log(`.`);
+                        console.log(`...`);
+                        console.log(`....`);
+                        console.log(`.....`);
+                        console.log(`......`);
+                        console.log(`.......`);
+                        console.log(`......`);
+                        console.log(`.....`);
+                        console.log(`....`);
+                        console.log(`...`);
+                        console.log(`..`);
+                        console.log(`.`);
+                        console.log(`.`);
+                        console.log(`...`);
+                        console.log(`....`);
+                        console.log(`.....`);
+                        console.log(`......`);
+                        console.log(`.......`);
+                        console.log(`......`);
+                        console.log(`.....`);
+                        console.log(`....`);
+                        console.log(`...`);
+                        console.log(`..`);
+                        console.log(`.`);
+                        var updateProductQuantity = res[0].stock_quantity - answer.howManyUnits;
+                        console.log(`local quantity: ${updateProductQuantity}`);
+                        connection.query("UPDATE products SET ? WHERE ?")[
+                            { stock_quantity: 400},
+                            { id: itemNumber}]
+                        console.log(`updated quantity: ${res[0].stock_quantity} | for id: ${res[0].id} | for product: ${res[0].product_name}\n\n\n\n\n\n\n`);
 
-            } else {
-                console.log("Whoh, hold your horses, you seem like a horder. There isn't enough in inventory for your order!\n\n\n");
-                inquirer.prompt({
-                    name: "tryAgainorGoHome",
-                    type: "rawlist",
-                    message: "Would you like to try to buy less or buy something else?",
-                    choices: ["Let me try again", "I want to leave"
-                    ]
-                }).then(function (choice) {
-                    switch (choice.action) {
-                        case "Let me try again":
-                            purchaseProducts()
-                            break;
-                        case "I want to leave":
-                            mainSelectionPage()
-                            break;
+                        inquirer.prompt({
+                            name: "buyMoreorGoHome",
+                            type: "rawlist",
+                            message: "Would you like to buy more products?\n\n\n",
+                            choices: ["YES I NEED TO BUY MORE!!!!", "...Nah..."]
+                        }).then(function (choice) {
+                            switch (choice.buyMoreorGoHome) {
+                                case "YES I NEED TO BUY MORE!!!!":
+                                    purchaseProducts()
+                                    break;
+                                case "...Nah...":
+                                    mainSelectionPage()
+                                    break;
+                            }
+                        })
                     }
-                });
-            }
+
+                } else {
+                    console.log("Whoh, hold your horses, you seem like a horder. There isn't enough in inventory for your order!\n\n\n");
+                    inquirer.prompt({
+                        name: "tryAgainorGoHome",
+                        type: "rawlist",
+                        message: "Would you like to try to buy less or buy something else?",
+                        choices: ["Let me try again", "I want to leave"
+                        ]
+                    }).then(function (choice) {
+                        switch (choice.tryAgainorGoHome) {
+                            case "Let me try again":
+                                purchaseProducts()
+                                break;
+                            case "I want to leave":
+                                mainSelectionPage()
+                                break;
+                        }
+                    });
+                }
+            })
         })
     });
 }
 
-function leaveBamazon () {
+function leaveBamazon() {
     console.log("\n\n\nThank you for shopping at BAMazon, goodbye!\n\n\n\n");
     connection.end();
+}
+
+function displayDatabaseItems() {
+    connection.query("SELECT * FROM products", function (err, res) {
+        if (err) throw err;
+        console.log("\n=============================================================================================\nCurrent Inventory\n____________________________________________________________________\n");
+        for (var i = 0; i < res.length; i++) {
+            console.log(`ID: ${res[i].id} | NAME: ${res[i].product_name} | DEPARTMENT: ${res[i].department_name} | PRICE: ${res[i].price} | REMAING: ${res[i].stock_quantity}`);
+        }
+    })
 }
