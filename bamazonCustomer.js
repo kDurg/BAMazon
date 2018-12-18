@@ -15,6 +15,8 @@ connection.connect(function (err) {
     mainSelectionPage();
 });
 
+// var itemNumber;
+
 function mainSelectionPage() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
@@ -96,7 +98,7 @@ function purchaseProducts() {
                 if (err) throw err;
                 if (res[0].stock_quantity >= answer.howManyUnits) { //need to pull object by id, compare number?
                     console.log(`\n\n\nYou bought ${answer.howManyUnits} x ${res[0].product_name}. Thank you! \n\nWhat would you like to do now?\n`);
-                    updateProductQuantity();
+                    updateProductQuantity(answer.purchaseWhichItem, answer.howManyUnits);
                 } else {
                     console.log("Whoh, hold your horses, you seem like a horder. There isn't enough in inventory for your order!\n\n\n");
                     inquirer.prompt({
@@ -154,31 +156,21 @@ function updatingScreen() {
     console.log(`.\n\n`);
 }
 
-function updateProductQuantity() {
+function updateProductQuantity(item, quantity) {
     updatingScreen();
-    morePurchase();
 
-    connection.query("SELECT * FROM products", function (err, res) {
-        if (err) throw err;
-
-        for (var i = 0; i < res.length; i++) {
-            var updateProductQuantity = res[0].stock_quantity - answer.howManyUnits;
-            console.log(`local quantity: ${updateProductQuantity}`);
-        //update is not updating database???
-            connection.query("UPDATE products SET ? WHERE ?"[{stock_quantity: 400}, {id: itemNumber}]), 
-                function(err,res) {
-                    if (err) throw err;
-                    console.log(`updated quantity: ${res[0].stock_quantity} | for id: ${res[0].id} | for product: ${res[0].product_name}\n\n\n\n\n\n\n`);   
-                };
-            }
-        }, 
-    )
-}   
-    // quantities remain the same???
-    // kicks me out before the next prompt can return us to buy more or back to the homescreen
+    connection.query("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?", [ quantity , item ],
+        function (err, res) {
+            if (err) throw err;
+            console.log(`updated quantity by ${quantity} | for id: ${item} \n\n`);
+            morePurchase();
+        })
+}
+// quantities remain the same???
+// kicks me out before the next prompt can return us to buy more or back to the homescreen
 
 
-function morePurchase(){
+function morePurchase() {
     inquirer.prompt({
         name: "buyMoreorGoHome",
         type: "list",
